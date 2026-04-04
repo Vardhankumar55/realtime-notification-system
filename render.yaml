@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: notifyhub-backend
+    env: java
+    region: oregon
+    plan: free
+    buildCommand: cd backend && mvn clean package -DskipTests
+    startCommand: java -jar backend/target/notification-system-1.0.0.jar
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRATION
+        value: "86400000"
+      - key: CORS_ORIGINS
+        sync: false
+      - key: JAVA_VERSION
+        value: "17"
