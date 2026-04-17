@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { notificationAPI } from "../services/api";
-import { useNotifications } from "../context/NotificationContext";
+import { useNotifications } from "../context/LiveContext";
 
 /**
  * Login page — handles user authentication.

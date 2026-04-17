@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNotifications } from "../context/NotificationContext";
+import { useNotifications } from "../context/LiveContext";
 import { notificationAPI } from "../services/api";
 import Navbar from "../components/common/Navbar";
 import NotificationCard from "../components/notifications/NotificationCard";

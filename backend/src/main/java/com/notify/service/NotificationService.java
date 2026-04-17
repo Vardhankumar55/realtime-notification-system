@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Transactional
+@SuppressWarnings("null")
 public class NotificationService {
 
     @Autowired
@@ -53,9 +54,12 @@ public class NotificationService {
     @Autowired
     private FileStorageService fileStorageService;
 
+    @Autowired
+    private WebPushService webPushService;
+
     /**
      * Send a notification to one or more users (or all users).
-     * After persisting, push via WebSocket to each recipient.
+     * After persisting, push via WebSocket and Web Push to each recipient.
      */
     public List<NotificationDto.NotificationResponse> sendNotification(
             NotificationDto.SendRequest request, org.springframework.web.multipart.MultipartFile file) {
@@ -65,26 +69,36 @@ public class NotificationService {
         Notification notification = Notification.builder()
             .title(request.getTitle())
             .message(request.getMessage())
+            .summary(buildSummary(request.getSummary(), request.getMessage()))
             .type(request.getType())
+            .priority(request.getPriority() != null ? request.getPriority() : Notification.NotificationPriority.MEDIUM)
             .sender(sender)
             .canReply(request.getCanReply() != null ? request.getCanReply() : false)
             .targetType(request.getTargetType())
             .targetBranch(request.getBranch())
             .targetYear(request.getYear())
             .targetSection(request.getSection())
+            .targetUserIds(request.getTargetUserIds() != null && !request.getTargetUserIds().isEmpty()
+                ? request.getTargetUserIds().stream().map(String::valueOf).collect(Collectors.joining(","))
+                : null)
+            .actionButtonText(request.getActionButtonText())
+            .actionButtonUrl(request.getActionButtonUrl())
             .build();
 
-        if (request.getTargetUserIds() != null && !request.getTargetUserIds().isEmpty()) {
-            notification.setTargetUserIds(request.getTargetUserIds().stream()
-                .map(String::valueOf).collect(Collectors.joining(",")));
-        }
-
+        notificationRepository.save(notification);
+        notification.setDeepLink(
+            request.getDeepLink() != null && !request.getDeepLink().isBlank()
+                ? request.getDeepLink().trim()
+                : "/notifications?notification=" + notification.getId()
+        );
         notificationRepository.save(notification);
 
         if (file != null && !file.isEmpty()) {
             String storedFileName = fileStorageService.storeFile(file);
             notification.setAttachmentName(file.getOriginalFilename());
             notification.setAttachmentUrl("/api/notifications/download/" + storedFileName);
+            notification.setAttachmentContentType(file.getContentType());
+            notification.setAttachmentSize(file.getSize());
             notificationRepository.save(notification);
         }
 
@@ -99,25 +113,7 @@ public class NotificationService {
             notificationRepository.save(notification);
         }
 
-        // Broadcast to all connected users immediately (only if not scheduled)
-        if (!scheduled && "ALL".equalsIgnoreCase(notification.getTargetType())) {
-            messagingTemplate.convertAndSend("/topic/notifications/all",
-                NotificationDto.WebSocketNotification.builder()
-                    .id(notification.getId())
-                    .title(notification.getTitle())
-                    .message(notification.getMessage())
-                    .type(notification.getType().name())
-                    .senderId(sender.getId())
-                    .senderName(sender.getName())
-                    .createdAt(notification.getCreatedAt())
-                    .canReply(notification.getCanReply())
-                    .attachmentUrl(notification.getAttachmentUrl())
-                    .attachmentName(notification.getAttachmentName())
-                    .action("PUSH")
-                    .build());
-        }
-
-        // Create UserNotification records and push targeted WebSocket pulses
+        // Create UserNotification records and push targeted WebSocket updates.
         for (User target : targets) {
             // Find override if exists
             NotificationDto.UserOverride override = request.getUserOverrides() == null ? null :
@@ -128,6 +124,10 @@ public class NotificationService {
 
             String finalTitle = override != null && override.getTitle() != null ? override.getTitle() : notification.getTitle();
             String finalMessage = override != null && override.getMessage() != null ? override.getMessage() : notification.getMessage();
+            String finalSummary = buildSummary(
+                request.getSummary(),
+                override != null && override.getMessage() != null ? override.getMessage() : notification.getMessage()
+            );
 
             UserNotification un = UserNotification.builder()
                 .user(target)
@@ -138,15 +138,15 @@ public class NotificationService {
                 .build();
             userNotificationRepository.save(un);
 
-            // Targeted push for individuals (if not already broadcast and not scheduled)
-            if (!scheduled && !"ALL".equalsIgnoreCase(notification.getTargetType())) {
-                messagingTemplate.convertAndSend(
-                    "/topic/notifications/" + target.getEmail(),
+            if (!scheduled) {
+                NotificationDto.WebSocketNotification.WebSocketNotificationBuilder wsBuilder =
                     NotificationDto.WebSocketNotification.builder()
                         .id(notification.getId())
                         .title(finalTitle)
                         .message(finalMessage)
+                        .summary(finalSummary)
                         .type(notification.getType().name())
+                        .priority(notification.getPriority().name())
                         .senderId(sender.getId())
                         .senderName(sender.getName())
                         .createdAt(notification.getCreatedAt())
@@ -154,9 +154,21 @@ public class NotificationService {
                         .canReply(notification.getCanReply())
                         .attachmentUrl(notification.getAttachmentUrl())
                         .attachmentName(notification.getAttachmentName())
-                        .action("PUSH")
-                        .build()
-                );
+                        .deepLink(notification.getDeepLink())
+                        .actionButtonText(notification.getActionButtonText())
+                        .actionButtonUrl(notification.getActionButtonUrl())
+                        .action("PUSH");
+
+                if (un.getIsArchived() != null) wsBuilder.isArchived(un.getIsArchived());
+                if (un.getSnoozedUntil() != null) wsBuilder.snoozedUntil(un.getSnoozedUntil());
+
+                messagingTemplate.convertAndSend("/topic/notifications/" + target.getEmail().toLowerCase(), wsBuilder.build());
+
+                // 🔔 Send Web Push notification (works even when site is closed!)
+                if (!target.getId().equals(sender.getId())) {
+                    webPushService.sendPushToUser(target, finalTitle, finalSummary != null ? finalSummary : finalMessage,
+                        notification.getType().name(), notification.getDeepLink(), notification.getPriority().name(), null);
+                }
             }
         }
 
@@ -179,17 +191,20 @@ public class NotificationService {
         List<UserNotification> userNotifications = userNotificationRepository.findByNotificationId(notificationId);
         
         for (UserNotification un : userNotifications) {
-            messagingTemplate.convertAndSend("/topic/notifications/" + un.getUser().getEmail(),
+            messagingTemplate.convertAndSend("/topic/notifications/" + un.getUser().getEmail().toLowerCase(),
                 NotificationDto.WebSocketNotification.builder()
                     .id(notification.getId())
                     .title(notification.getTitle())
                     .message("Admin is Editing the Notification please wait")
+                    .summary(notification.getSummary())
                     .type(notification.getType().name())
+                    .priority(notification.getPriority().name())
                     .senderId(sender.getId())
                     .senderName(sender.getName())
                     .createdAt(notification.getCreatedAt())
                     .userNotificationId(un.getId())
                     .adminId(sender.getId())
+                    .deepLink(notification.getDeepLink())
                     .action("EDITING")
                     .build());
         }
@@ -199,48 +214,41 @@ public class NotificationService {
      * Called by the scheduler to fire a pending scheduled notification.
      * Pushes WebSocket events to all linked users.
      */
-    public void fireScheduledNotification(Notification notification) {
+    public void fireScheduledNotification(com.notify.entity.Notification notification) {
         User sender = notification.getSender();
         List<UserNotification> userNotifications =
             userNotificationRepository.findByNotificationId(notification.getId());
 
-        boolean isAll = userNotifications.size() > 5; // heuristic for broadcast
+        for (UserNotification un : userNotifications) {
+            NotificationDto.WebSocketNotification.WebSocketNotificationBuilder builder = NotificationDto.WebSocketNotification.builder()
+                .id(notification.getId())
+                .title(un.getTitleOverride() != null ? un.getTitleOverride() : notification.getTitle())
+                .message(un.getMessageOverride() != null ? un.getMessageOverride() : notification.getMessage())
+                .summary(buildSummary(notification.getSummary(), un.getMessageOverride() != null ? un.getMessageOverride() : notification.getMessage()))
+                .type(notification.getType().name())
+                .priority(notification.getPriority().name())
+                .senderId(sender.getId())
+                .senderName(sender.getName())
+                .createdAt(notification.getCreatedAt())
+                .userNotificationId(un.getId())
+                .canReply(notification.getCanReply())
+                .attachmentUrl(notification.getAttachmentUrl())
+                .attachmentName(notification.getAttachmentName())
+                .deepLink(notification.getDeepLink())
+                .action("PUSH");
 
-        if (isAll) {
-            messagingTemplate.convertAndSend("/topic/notifications/all",
-                NotificationDto.WebSocketNotification.builder()
-                    .id(notification.getId())
-                    .title(notification.getTitle())
-                    .message(notification.getMessage())
-                    .type(notification.getType().name())
-                    .senderId(sender.getId())
-                    .senderName(sender.getName())
-                    .createdAt(notification.getCreatedAt())
-                    .canReply(notification.getCanReply())
-                    .attachmentUrl(notification.getAttachmentUrl())
-                    .attachmentName(notification.getAttachmentName())
-                    .action("PUSH")
-                    .build());
-        } else {
-            for (UserNotification un : userNotifications) {
-                messagingTemplate.convertAndSend(
-                    "/topic/notifications/" + un.getUser().getEmail(),
-                    NotificationDto.WebSocketNotification.builder()
-                        .id(notification.getId())
-                        .title(notification.getTitle())
-                        .message(notification.getMessage())
-                        .type(notification.getType().name())
-                        .senderId(sender.getId())
-                        .senderName(sender.getName())
-                        .createdAt(notification.getCreatedAt())
-                        .userNotificationId(un.getId())
-                        .canReply(notification.getCanReply())
-                        .attachmentUrl(notification.getAttachmentUrl())
-                        .attachmentName(notification.getAttachmentName())
-                        .action("PUSH")
-                        .build()
-                );
-            }
+            if (un.getIsFavorite() != null) builder.isFavorite(un.getIsFavorite());
+            if (un.getIsArchived() != null) builder.isArchived(un.getIsArchived());
+            if (un.getIsArchived() != null) builder.isArchived(un.getIsArchived());
+            if (un.getSnoozedUntil() != null) builder.snoozedUntil(un.getSnoozedUntil());
+
+            messagingTemplate.convertAndSend("/topic/notifications/" + un.getUser().getEmail().toLowerCase(), builder.build());
+
+            // 🔔 Send Web Push for scheduled notification
+            String pushTitle = un.getTitleOverride() != null ? un.getTitleOverride() : notification.getTitle();
+            String pushMsg = notification.getSummary() != null ? notification.getSummary() : notification.getMessage();
+            webPushService.sendPushToUser(un.getUser(), pushTitle, pushMsg,
+                notification.getType().name(), notification.getDeepLink(), notification.getPriority().name(), null);
         }
 
         // Mark as no longer scheduled
@@ -254,7 +262,7 @@ public class NotificationService {
     public List<NotificationDto.NotificationResponse> getMyNotifications() {
         User user = authService.getCurrentUser();
         return userNotificationRepository
-            .findByUserIdOrderByIsPinnedDescNotificationCreatedAtDesc(user.getId())
+            .findActiveByUserId(user.getId())
             .stream()
             .map(un -> toResponse(un.getNotification(), un.getNotification().getSender(), un))
             .collect(Collectors.toList());
@@ -279,7 +287,7 @@ public class NotificationService {
             ? LocalDateTime.parse(filter.getEndDate()) : null;
 
         List<UserNotification> results = userNotificationRepository
-            .findWithFilters(user.getId(), type, startDate, endDate, filter.getIsFavorite());
+            .findWithFilters(user.getId(), type, startDate, endDate, filter.getIsFavorite(), filter.getIsArchived());
 
         if (filter.getIsRead() != null) {
             results = results.stream()
@@ -332,7 +340,7 @@ public class NotificationService {
      */
     public long getUnreadCount() {
         User user = authService.getCurrentUser();
-        return userNotificationRepository.countByUserIdAndIsReadFalse(user.getId());
+        return userNotificationRepository.countActiveUnreadByUserId(user.getId());
     }
 
     /**
@@ -421,7 +429,7 @@ public class NotificationService {
      */
     public void clearAllNotifications() {
         User user = authService.getCurrentUser();
-        List<UserNotification> all = userNotificationRepository.findByUserIdOrderByIsPinnedDescNotificationCreatedAtDesc(user.getId());
+        List<UserNotification> all = userNotificationRepository.findActiveByUserId(user.getId());
         userNotificationRepository.deleteAll(all);
 
         // Broadcast to user's specific topic
@@ -464,11 +472,18 @@ public class NotificationService {
 
         n.setTitle(req.getTitle());
         n.setMessage(req.getMessage());
+        n.setSummary(buildSummary(req.getSummary(), req.getMessage()));
         if (req.getType() != null) {
             n.setType(req.getType());
         }
+        if (req.getPriority() != null) {
+            n.setPriority(req.getPriority());
+        }
         if (req.getCanReply() != null) {
             n.setCanReply(req.getCanReply());
+        }
+        if (req.getDeepLink() != null && !req.getDeepLink().isBlank()) {
+            n.setDeepLink(req.getDeepLink().trim());
         }
         n.setEditedAt(LocalDateTime.now());
         n.setUpdatedBy(currentUser);
@@ -497,7 +512,9 @@ public class NotificationService {
                     .id(n.getId())
                     .title(n.getTitle())
                     .message(n.getMessage())
+                    .summary(n.getSummary())
                     .type(n.getType().name())
+                    .priority(n.getPriority().name())
                     .senderId(n.getSender().getId())
                     .senderName(n.getSender().getName())
                     .createdAt(n.getCreatedAt())
@@ -506,6 +523,11 @@ public class NotificationService {
                     .adminId(currentUser.getId())
                     .attachmentUrl(n.getAttachmentUrl())
                     .attachmentName(n.getAttachmentName())
+                    .deepLink(n.getDeepLink())
+                    .actionButtonText(n.getActionButtonText())
+                    .actionButtonUrl(n.getActionButtonUrl())
+                    .isArchived(un != null ? un.getIsArchived() : null)
+                    .isArchived(un != null ? un.getIsArchived() : null)
                     .userNotificationId(un != null ? un.getId() : null)
                     .action("UPDATE")
                     .build());
@@ -538,7 +560,9 @@ public class NotificationService {
                 .id(n.getId())
                 .title(un.getTitleOverride())
                 .message(un.getMessageOverride())
+                .summary(buildSummary(n.getSummary(), un.getMessageOverride()))
                 .type(n.getType().name())
+                .priority(n.getPriority().name())
                 .senderId(n.getSender().getId())
                 .senderName(n.getSender().getName())
                 .createdAt(n.getCreatedAt())
@@ -547,6 +571,7 @@ public class NotificationService {
                 .canReply(n.getCanReply())
                 .attachmentUrl(n.getAttachmentUrl())
                 .attachmentName(n.getAttachmentName())
+                .deepLink(n.getDeepLink())
                 .action("UPDATE")
                 .build());
 
@@ -578,12 +603,14 @@ public class NotificationService {
             userNotificationRepository.save(un);
 
             // Notify specific user about their unique update
-            messagingTemplate.convertAndSend("/topic/notifications/" + targetUser.getEmail(),
+            messagingTemplate.convertAndSend("/topic/notifications/" + targetUser.getEmail().toLowerCase(),
                 NotificationDto.WebSocketNotification.builder()
                     .id(n.getId())
                     .title(un.getTitleOverride())
                     .message(un.getMessageOverride())
+                    .summary(buildSummary(n.getSummary(), un.getMessageOverride()))
                     .type(n.getType().name())
+                    .priority(n.getPriority().name())
                     .senderId(n.getSender().getId())
                     .senderName(n.getSender().getName())
                     .createdAt(n.getCreatedAt())
@@ -592,6 +619,7 @@ public class NotificationService {
                     .canReply(n.getCanReply())
                     .attachmentUrl(n.getAttachmentUrl())
                     .attachmentName(n.getAttachmentName())
+                    .deepLink(n.getDeepLink())
                     .action("UPDATE")
                     .build());
         }
@@ -646,7 +674,9 @@ public class NotificationService {
                 .id(un.getNotification().getId())
                 .title(un.getTitleOverride() != null ? un.getTitleOverride() : un.getNotification().getTitle())
                 .message(un.getMessageOverride() != null ? un.getMessageOverride() : un.getNotification().getMessage())
+                .summary(buildSummary(un.getNotification().getSummary(), un.getMessageOverride() != null ? un.getMessageOverride() : un.getNotification().getMessage()))
                 .type(un.getNotification().getType().name())
+                .priority(un.getNotification().getPriority().name())
                 .senderId(un.getNotification().getSender().getId())
                 .senderName(un.getNotification().getSender().getName())
                 .createdAt(un.getNotification().getCreatedAt())
@@ -657,6 +687,11 @@ public class NotificationService {
                 .canReply(un.getNotification().getCanReply())
                 .attachmentUrl(un.getNotification().getAttachmentUrl())
                 .attachmentName(un.getNotification().getAttachmentName())
+                .deepLink(un.getNotification().getDeepLink())
+                .actionButtonText(un.getNotification().getActionButtonText())
+                .actionButtonUrl(un.getNotification().getActionButtonUrl())
+                .isArchived(un.getIsArchived())
+                .isArchived(un.getIsArchived())
                 .action(action)
                 .build());
     }
@@ -739,13 +774,16 @@ public class NotificationService {
 
         String displayTitle = (un != null && un.getTitleOverride() != null) ? un.getTitleOverride() : n.getTitle();
         String displayMessage = (un != null && un.getMessageOverride() != null) ? un.getMessageOverride() : n.getMessage();
+        String displaySummary = buildSummary(n.getSummary(), displayMessage);
         LocalDateTime displayEditedAt = (un != null && un.getEditedAt() != null) ? un.getEditedAt() : n.getEditedAt();
 
         return NotificationDto.NotificationResponse.builder()
             .id(n.getId())
             .title(displayTitle)
             .message(displayMessage)
+            .summary(displaySummary)
             .type(n.getType().name())
+            .priority(n.getPriority().name())
             .sender(NotificationDto.SenderInfo.builder()
                 .id(sender.getId())
                 .name(sender.getName())
@@ -768,6 +806,15 @@ public class NotificationService {
             .scheduledAt(n.getScheduledAt())
             .attachmentUrl(n.getAttachmentUrl())
             .attachmentName(n.getAttachmentName())
+            .attachmentContentType(n.getAttachmentContentType())
+            .attachmentSize(n.getAttachmentSize())
+            .deepLink(n.getDeepLink())
+            .actionButtonText(n.getActionButtonText())
+            .actionButtonUrl(n.getActionButtonUrl())
+            .expiresAt(n.getExpiresAt())
+            .isArchived(un != null ? un.getIsArchived() : null)
+            .isArchived(un != null ? un.getIsArchived() : null)
+            .snoozedUntil(un != null ? un.getSnoozedUntil() : null)
             .build();
     }
 
@@ -778,7 +825,9 @@ public class NotificationService {
         String tt = n.getTargetType() == null ? "" : n.getTargetType().trim().toUpperCase();
         switch (tt) {
             case "ALL":
-                return userRepository.findAll();
+                return userRepository.findAll().stream()
+                    .filter(user -> Boolean.TRUE.equals(user.getIsEnabled()))
+                    .collect(Collectors.toList());
             case "MULTIPLE":
             case "SINGLE":
             case "INDIVIDUAL":
@@ -787,14 +836,58 @@ public class NotificationService {
                 }
                 List<Long> ids = java.util.Arrays.stream(n.getTargetUserIds().split(","))
                     .map(Long::valueOf).collect(Collectors.toList());
-                return userRepository.findAllById(ids);
+                return userRepository.findAllById(ids).stream()
+                    .filter(user -> Boolean.TRUE.equals(user.getIsEnabled()))
+                    .collect(Collectors.toList());
             case "GROUP":
                 String branch = "All".equalsIgnoreCase(n.getTargetBranch()) ? null : n.getTargetBranch();
                 String year = "All".equalsIgnoreCase(n.getTargetYear()) ? null : n.getTargetYear();
                 String section = "All".equalsIgnoreCase(n.getTargetSection()) ? null : n.getTargetSection();
-                return userRepository.findByCollegeDetails(branch, year, section);
+                return userRepository.findByCollegeDetails(branch, year, section).stream()
+                    .filter(user -> Boolean.TRUE.equals(user.getIsEnabled()))
+                    .collect(Collectors.toList());
             default:
                 return new java.util.ArrayList<>();
         }
+    }
+
+    private String buildSummary(String preferredSummary, String fallbackMessage) {
+        if (preferredSummary != null && !preferredSummary.isBlank()) {
+            return preferredSummary.trim();
+        }
+        if (fallbackMessage == null) {
+            return "";
+        }
+        String compact = fallbackMessage.trim().replaceAll("\\s+", " ");
+        if (compact.length() <= 140) {
+            return compact;
+        }
+        return compact.substring(0, 137) + "...";
+    }
+
+    /**
+     * Toggle archive status of a user notification.
+     */
+    @Transactional
+    public NotificationDto.NotificationResponse toggleArchive(Long userNotificationId) {
+        UserNotification un = userNotificationRepository.findById(userNotificationId)
+            .orElseThrow(() -> new RuntimeException("Notification not found"));
+        boolean nowArchived = !Boolean.TRUE.equals(un.getIsArchived());
+        un.setIsArchived(nowArchived);
+        userNotificationRepository.save(un);
+        return toResponse(un.getNotification(), un.getNotification().getSender(), un);
+    }
+
+    /**
+     * Snooze a user notification for the given number of minutes.
+     */
+    @Transactional
+    public NotificationDto.NotificationResponse snoozeNotification(Long userNotificationId,
+            NotificationDto.SnoozeRequest request) {
+        UserNotification un = userNotificationRepository.findById(userNotificationId)
+            .orElseThrow(() -> new RuntimeException("Notification not found"));
+        un.setSnoozedUntil(LocalDateTime.now().plusMinutes(request.getSnoozeMinutes()));
+        userNotificationRepository.save(un);
+        return toResponse(un.getNotification(), un.getNotification().getSender(), un);
     }
 }

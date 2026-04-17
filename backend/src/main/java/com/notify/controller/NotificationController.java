@@ -1,6 +1,11 @@
 package com.notify.controller;
 
 import com.notify.dto.NotificationDto;
+import com.notify.entity.Notification;
+import com.notify.entity.User;
+import com.notify.repository.NotificationRepository;
+import com.notify.repository.UserNotificationRepository;
+import com.notify.service.AuthService;
 import com.notify.service.NotificationService;
 import com.notify.service.FileStorageService;
 import jakarta.validation.Valid;
@@ -8,9 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -26,6 +33,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/notifications")
 @CrossOrigin(origins = "*", maxAge = 3600)
+@SuppressWarnings("null")
 public class NotificationController {
 
     @Autowired
@@ -34,9 +42,19 @@ public class NotificationController {
     @Autowired
     private FileStorageService fileStorageService;
 
+    @Autowired
+    private AuthService authService;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private UserNotificationRepository userNotificationRepository;
+
     @GetMapping("/download/{fileName:.+}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileName) {
         try {
+            requireAttachmentAccess(fileName);
             Path filePath = fileStorageService.loadFileAsResource(fileName);
             Resource resource = new UrlResource(filePath.toUri());
 
@@ -47,6 +65,8 @@ public class NotificationController {
             } else {
                 return ResponseEntity.notFound().build();
             }
+        } catch (ResponseStatusException ex) {
+            return ResponseEntity.status(ex.getStatusCode()).build();
         } catch (Exception ex) {
             return ResponseEntity.internalServerError().build();
         }
@@ -55,6 +75,7 @@ public class NotificationController {
     @GetMapping("/view/{fileName:.+}")
     public ResponseEntity<Resource> viewFile(@PathVariable String fileName) {
         try {
+            requireAttachmentAccess(fileName);
             Path filePath = fileStorageService.loadFileAsResource(fileName);
             Resource resource = new UrlResource(filePath.toUri());
 
@@ -70,6 +91,8 @@ public class NotificationController {
             } else {
                 return ResponseEntity.notFound().build();
             }
+        } catch (ResponseStatusException ex) {
+            return ResponseEntity.status(ex.getStatusCode()).build();
         } catch (Exception ex) {
             return ResponseEntity.internalServerError().build();
         }
@@ -191,6 +214,25 @@ public class NotificationController {
             response.getIsFavorite() ? "Added to favorites" : "Removed from favorites", response));
     }
 
+    /** Archive a notification */
+    @PatchMapping("/{userNotificationId}/archive")
+    public ResponseEntity<NotificationDto.ApiResponse<NotificationDto.NotificationResponse>> toggleArchive(
+            @PathVariable("userNotificationId") Long userNotificationId) {
+        NotificationDto.NotificationResponse response = notificationService.toggleArchive(userNotificationId);
+        return ResponseEntity.ok(NotificationDto.ApiResponse.success(
+            response.getIsArchived() ? "Notification archived" : "Notification unarchived", response));
+    }
+
+    /** Snooze a notification */
+    @PostMapping("/{userNotificationId}/snooze")
+    public ResponseEntity<NotificationDto.ApiResponse<NotificationDto.NotificationResponse>> snoozeNotification(
+            @PathVariable("userNotificationId") Long userNotificationId,
+            @Valid @RequestBody NotificationDto.SnoozeRequest request) {
+        NotificationDto.NotificationResponse response = notificationService.snoozeNotification(userNotificationId, request);
+        return ResponseEntity.ok(NotificationDto.ApiResponse.success(
+            "Notification snoozed for " + request.getSnoozeMinutes() + " minutes", response));
+    }
+
     @GetMapping("/offline-new")
     public ResponseEntity<NotificationDto.ApiResponse<List<NotificationDto.NotificationResponse>>> getOfflineNew() {
         return ResponseEntity.ok(NotificationDto.ApiResponse.success(
@@ -204,5 +246,22 @@ public class NotificationController {
             @Valid @RequestBody NotificationDto.ReplyRequest request) {
         NotificationDto.ReplyResponse response = notificationService.replyToNotification(id, request);
         return ResponseEntity.ok(NotificationDto.ApiResponse.success("Reply sent successfully", response));
+    }
+
+    private Notification requireAttachmentAccess(String fileName) {
+        String attachmentUrl = "/api/notifications/download/" + fileName;
+        Notification notification = notificationRepository.findByAttachmentUrl(attachmentUrl)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Attachment not found"));
+
+        User currentUser = authService.getCurrentUser();
+        boolean canAccess = currentUser.getRole() == User.Role.ROLE_ADMIN
+            || notification.getSender().getId().equals(currentUser.getId())
+            || userNotificationRepository.existsByUserIdAndNotificationId(currentUser.getId(), notification.getId());
+
+        if (!canAccess) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to access this attachment");
+        }
+
+        return notification;
     }
 }

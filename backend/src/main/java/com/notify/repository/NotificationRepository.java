@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository for Notification entity CRUD operations.
@@ -18,4 +19,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     List<Notification> findByType(Notification.NotificationType type);
 
     List<Notification> findByIsScheduledTrueAndScheduledAtBefore(LocalDateTime now);
+
+    Optional<Notification> findByAttachmentUrl(String attachmentUrl);
 }

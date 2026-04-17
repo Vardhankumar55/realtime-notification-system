@@ -11,6 +11,14 @@ const api = axios.create({
   timeout: 15000,
 });
 
+export const buildProtectedAssetUrl = (assetPath) => {
+  if (!assetPath) return "";
+  const apiBase = process.env.REACT_APP_API_URL || "http://localhost:8080/api";
+  const apiRoot = apiBase.replace(/\/api$/, "");
+  const token = localStorage.getItem("token");
+  return token ? `${apiRoot}${assetPath}?token=${encodeURIComponent(token)}` : `${apiRoot}${assetPath}`;
+};
+
 // ── Request interceptor: attach JWT ─────────────────────────
 api.interceptors.request.use(
   (config) => {
@@ -56,6 +64,10 @@ export const adminAPI = {
   disableUser: (id) => api.put(`/admin/users/${id}/disable`),
   enableUser: (id) => api.put(`/admin/users/${id}/enable`),
   changeRole: (id, role) => api.put(`/admin/users/${id}/role`, { role }),
+  getAllUsers: () => api.get("/admin/users"),
+  disableUser: (id) => api.put(`/admin/users/${id}/disable`),
+  enableUser: (id) => api.put(`/admin/users/${id}/enable`),
+  changeRole: (id, role) => api.put(`/admin/users/${id}/role`, { role }),
   deleteUser: (id) => api.delete(`/admin/users/${id}`),
   updateNotification: (id, data) => api.put(`/admin/notifications/${id}`, data),
   updateUserNotification: (id, userId, data) => api.put(`/admin/notifications/${id}/user/${userId}`, data),
@@ -65,6 +77,25 @@ export const adminAPI = {
   getRepliesByNotification: (id) => api.get(`/admin/notification-replies/${id}`),
   markReplyRead: (id) => api.patch(`/admin/notification-replies/${id}/read`),
   getUnreadReplyCount: () => api.get("/admin/notification-replies/unread-count"),
+
+  // Templates
+  getTemplates: () => api.get("/admin/templates"),
+  getTemplate: (id) => api.get(`/admin/templates/${id}`),
+  createTemplate: (data) => api.post("/admin/templates", data),
+  updateTemplate: (id, data) => api.put(`/admin/templates/${id}`, data),
+  deleteTemplate: (id) => api.delete(`/admin/templates/${id}`),
+};
+
+export const messageAPI = {
+  getUsers: () => api.get("/messages/users"),
+  getBlockedUsers: () => api.get("/messages/blocked"),
+  getConversations: () => api.get("/messages/conversations"),
+  getConversation: (userId) => api.get(`/messages/conversation/${userId}`),
+  send: (data) => api.post("/messages/send", data),
+  markConversationRead: (userId) => api.patch(`/messages/conversation/${userId}/read`),
+  getUnreadCount: () => api.get("/messages/unread-count"),
+  block: (userId) => api.put(`/messages/block/${userId}`),
+  unblock: (userId) => api.delete(`/messages/block/${userId}`),
 };
 
 // ── Notification API ─────────────────────────────────────────
@@ -80,6 +111,8 @@ export const notificationAPI = {
   getAll: () => api.get("/notifications/all"),          // admin
   getMy: () => api.get("/notifications/my"),             // current user
   filter: (data) => api.post("/notifications/filter", data),
+
+
   markRead: (id) => api.patch(`/notifications/${id}/read`),
   markAllRead: () => api.patch("/notifications/read-all"),
   getUnreadCount: () => api.get("/notifications/unread-count"),
@@ -88,6 +121,8 @@ export const notificationAPI = {
   clearAll: () => api.delete("/notifications/clear-all"),
   pin: (id) => api.put(`/notifications/${id}/pin`),
   favorite: (id) => api.put(`/notifications/${id}/favorite`),
+  archive: (id) => api.patch(`/notifications/${id}/archive`),
+  snooze: (id, data) => api.post(`/notifications/${id}/snooze`, data),
   getOfflineNew: () => api.get("/notifications/offline-new"),
   reply: (id, data) => api.post(`/notifications/${id}/reply`, data),
   notifyEditing: (id) => api.post(`/notifications/${id}/notify-editing`),

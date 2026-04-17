@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../context/LiveContext";
 import NotificationBell from "../notifications/NotificationBell";
 
 /**

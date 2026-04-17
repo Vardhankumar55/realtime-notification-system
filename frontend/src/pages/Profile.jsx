@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { profileAPI } from "../services/api";
-import { useNotifications } from "../context/NotificationContext";
-import Navbar from "../components/common/Navbar";
+import { profileAPI, messageAPI } from "../services/api";
+import { useNotifications } from "../context/LiveContext";
+import Navbar from "../components/common/NavbarV2";
 
 const Profile = () => {
     const { user, setUser } = useAuth();
-    const { addToast } = useNotifications();
+    const { addToast, pushSupported, pushSubscribed, enablePushNotifications, disablePushNotifications } = useNotifications();
 
     const [profile, setProfile] = useState({
         name: "",
@@ -35,6 +35,16 @@ const Profile = () => {
 
     const [loading, setLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [blockedUsers, setBlockedUsers] = useState([]);
+
+    const loadBlockedUsers = async () => {
+        try {
+            const res = await messageAPI.getBlockedUsers();
+            setBlockedUsers(res.data.data || []);
+        } catch(err) {
+            console.error("Failed to load blocked users", err);
+        }
+    };
 
     useEffect(() => {
         if (user) {
@@ -55,6 +65,7 @@ const Profile = () => {
                 darkModeEnabled: user.darkModeEnabled ?? false,
                 emailAlertsEnabled: user.emailAlertsEnabled ?? false,
             });
+            loadBlockedUsers();
         }
     }, [user]);
 
@@ -130,7 +141,6 @@ const Profile = () => {
         try {
             const res = await profileAPI.updatePreferences(newPrefs);
             setUser({ ...user, ...res.data.data });
-            // Subtle feedback? Maybe no toast for toggle to avoid spam
         } catch (err) {
             setPrefs(prefs); // Revert
             addToast({
@@ -138,6 +148,16 @@ const Profile = () => {
                 message: "Failed to update settings",
                 type: "ERROR"
             });
+        }
+    };
+
+    const handleUnblock = async (userId) => {
+        try {
+            await messageAPI.unblock(userId);
+            setBlockedUsers(prev => prev.filter(u => u.id !== userId));
+            addToast({title: "Unblocked", message: "User has been unblocked.", type: "SUCCESS"});
+        } catch(err) {
+            addToast({title: "Error", message: "Failed to unblock user.", type: "ERROR"});
         }
     };
 
@@ -230,6 +250,33 @@ const Profile = () => {
                                     </div>
                                 ))}
                             </div>
+
+                            {/* Browser Push Notifications */}
+                            {pushSupported && (
+                                <div className="mt-6 pt-6 border-t border-gray-100">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-lg">📲</span>
+                                            <div>
+                                                <span className="text-sm font-bold text-gray-700 block">Browser Push</span>
+                                                <span className="text-[10px] text-gray-400 block mt-0.5">
+                                                    {pushSubscribed
+                                                        ? "✅ Active — notifications arrive even when site is closed"
+                                                        : "Enable to get alerts even when this site is closed"}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={pushSubscribed ? disablePushNotifications : enablePushNotifications}
+                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none 
+                                                ${pushSubscribed ? "bg-green-500" : "bg-gray-200"}`}
+                                        >
+                                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform 
+                                                ${pushSubscribed ? "translate-x-6" : "translate-x-1"}`} />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -434,13 +481,40 @@ const Profile = () => {
                                 </div>
                             </>
                         ) : (
-                            <div className="bg-white rounded-3xl border border-dashed border-gray-200 p-12 text-center">
-                                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <span className="text-2xl">👤</span>
+                            <>
+                                <div className="bg-white rounded-3xl border border-dashed border-gray-200 p-12 text-center">
+                                    <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <span className="text-2xl">👤</span>
+                                    </div>
+                                    <h3 className="text-gray-900 font-black uppercase tracking-tight">Identity Vault</h3>
+                                    <p className="text-sm text-gray-400 mt-2 max-w-xs mx-auto">Click "Edit Profile Details" in the identity card to modify your credentials and personal information.</p>
                                 </div>
-                                <h3 className="text-gray-900 font-black uppercase tracking-tight">Identity Vault</h3>
-                                <p className="text-sm text-gray-400 mt-2 max-w-xs mx-auto">Click "Edit Profile Details" in the identity card to modify your credentials and personal information.</p>
-                            </div>
+
+                                {/* Blocked Users Section */}
+                                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mt-6">
+                                    <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight mb-6">Blocked Users</h3>
+                                    {blockedUsers.length === 0 ? (
+                                        <p className="text-sm text-gray-400">You haven't blocked anyone.</p>
+                                    ) : (
+                                        <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                                            {blockedUsers.map(u => (
+                                                <div key={u.id} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-gray-50">
+                                                    <div>
+                                                        <p className="text-sm font-bold text-gray-900">{u.name}</p>
+                                                        <p className="text-xs text-gray-500">{u.email}</p>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => handleUnblock(u.id)}
+                                                        className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-black uppercase tracking-widest text-indigo-600 hover:bg-gray-100 transition-all shadow-sm"
+                                                    >
+                                                        Unblock
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </>
                         )}
                     </div>
                 </div>

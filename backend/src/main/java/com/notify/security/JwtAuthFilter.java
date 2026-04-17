@@ -27,6 +27,7 @@ import java.io.IOException;
  * 4. This allows Spring Security to know who is making the request
  */
 @Component
+@SuppressWarnings("null")
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
@@ -38,9 +39,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private UserDetailsServiceImpl userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+    protected void doFilterInternal(@org.springframework.lang.NonNull HttpServletRequest request,
+                                    @org.springframework.lang.NonNull HttpServletResponse response,
+                                    @org.springframework.lang.NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
         try {
@@ -71,6 +72,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
             return headerAuth.substring(7);
         }
-        return null;
+        String queryToken = request.getParameter("token");
+        return StringUtils.hasText(queryToken) ? queryToken : null;
     }
 }

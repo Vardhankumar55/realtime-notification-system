@@ -20,7 +20,7 @@ class WebSocketService {
     this.connected = false;
   }
 
-  connect(userEmail, isAdmin, onNotification, onReply, onConnect, onError) {
+  connect(userEmail, isAdmin, onNotification, onReply, onDirectMessage, onConnect, onError) {
     if (this.connected) return;
 
     this.client = new Client({
@@ -33,7 +33,7 @@ class WebSocketService {
 
         // Subscribe to user-specific notification topic
         this.client.subscribe(
-          `/topic/notifications/${userEmail}`,
+          `/topic/notifications/${userEmail.toLowerCase()}`,
           (message) => {
             try {
               const notification = JSON.parse(message.body);
@@ -65,6 +65,15 @@ class WebSocketService {
             }
           });
         }
+
+        this.client.subscribe(`/topic/messages/${userEmail.toLowerCase()}`, (message) => {
+          try {
+            const directMessage = JSON.parse(message.body);
+            if (onDirectMessage) onDirectMessage(directMessage);
+          } catch (e) {
+            console.error("Failed to parse WS direct message", e);
+          }
+        });
 
         if (onConnect) onConnect();
       },

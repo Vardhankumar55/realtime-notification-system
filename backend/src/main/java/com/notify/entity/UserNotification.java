@@ -52,6 +52,13 @@ public class UserNotification {
     @Builder.Default
     private Boolean isFavorite = false;
 
+    @Column(name = "is_archived", nullable = false)
+    @Builder.Default
+    private Boolean isArchived = false;
+
     @Column(name = "edited_at")
     private LocalDateTime editedAt;
+
+    @Column(name = "snoozed_until")
+    private LocalDateTime snoozedUntil;
 }

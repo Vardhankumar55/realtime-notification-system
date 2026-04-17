@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { formatDistanceToNow, format } from "date-fns";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../context/LiveContext";
 
 /**
  * Reusable card for displaying a single notification.

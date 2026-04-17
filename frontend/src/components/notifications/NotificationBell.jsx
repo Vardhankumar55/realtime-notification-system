@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNotifications } from "../../context/NotificationContext";
+import { useNotifications } from "../../context/LiveContext";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
 
@@ -132,7 +132,7 @@ const NotificationBell = () => {
                     <div
                       key={n.userNotificationId || n.id}
                       className={`flex gap-4 px-4 py-4 cursor-pointer transition-all duration-200 rounded-2xl relative border
-                        ${!isRead ? `bg-white ${cfg.color.replace('text-', 'border-')} shadow-sm` : "bg-white border-gray-100 hover:bg-gray-50 hover:shadow-sm"}`}
+                        ${!isRead ? `bg-white ${cfg.color.replace('text-', 'border-')} shadow-sm text-gray-900` : "bg-white border-gray-100 hover:bg-gray-50 hover:shadow-sm"}`}
                       onClick={() => {
                         if (!isRead) markAsRead(n.userNotificationId);
                         setOpen(false);
@@ -146,13 +146,30 @@ const NotificationBell = () => {
                           {n.title}
                         </p>
                         <p className="text-[13px] text-gray-500 mt-1.5 leading-relaxed font-medium line-clamp-2">{n.message}</p>
-                        <div className="flex items-center justify-between mt-2.5">
+                        <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-gray-50">
                           <p className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">
                             {n.createdAt ? formatDistanceToNow(new Date(n.createdAt), { addSuffix: true }) : ""}
                           </p>
-                          {!isRead && (
-                             <span className={`text-[9px] font-black ${cfg.bg} ${cfg.color} px-2 py-0.5 rounded-full uppercase`}>New</span>
-                          )}
+                          <div className="flex gap-2">
+                             {!isRead && (
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    markAsRead(n.userNotificationId);
+                                  }}
+                                  className="text-[11px] font-black text-indigo-600 hover:text-indigo-800 transition-colors uppercase tracking-tight"
+                                >
+                                  Mark Read
+                                </button>
+                             )}
+                             <Link 
+                               to={`/notifications?notification=${n.userNotificationId || n.id}`}
+                               onClick={() => setOpen(false)}
+                               className="text-[11px] font-black text-gray-400 hover:text-indigo-600 transition-colors uppercase tracking-tight"
+                             >
+                               {n.canReply ? "Reply" : "Open"}
+                             </Link>
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -25,6 +25,8 @@ export const NotificationProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
   const [wsConnected, setWsConnected] = useState(false);
   const toastTimers = useRef({});
+  const pendingGroupRef = useRef([]);
+  const groupTimerRef = useRef(null);
   const soundRef = useRef(new Audio("/sounds/samsung_spaceline.mp3"));
 
   // ── Sound Management ──────────────────────────────────────
@@ -69,9 +71,52 @@ export const NotificationProvider = ({ children }) => {
 
   // ── Toast management ────────────────────────────────────────
   const addToast = useCallback((notification) => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { ...notification, toastId: id }]);
-    toastTimers.current[id] = setTimeout(() => removeToast(id), 5000);
+    // Show system or URGENT toasts immediately
+    if (notification.isSystem || notification.priority === "URGENT") {
+      const id = Date.now() + Math.random();
+      setToasts((prev) => {
+        // Find insert index: URGENT goes to top, others below URGENT
+        if (notification.priority === "URGENT") {
+           return [{ ...notification, toastId: id }, ...prev];
+        }
+        return [...prev, { ...notification, toastId: id }];
+      });
+      if (notification.priority !== "URGENT") {
+        toastTimers.current[id] = setTimeout(() => removeToast(id), 5000);
+      }
+      return;
+    }
+
+    // Buffer normal toasts
+    pendingGroupRef.current.push(notification);
+    if (groupTimerRef.current) clearTimeout(groupTimerRef.current);
+
+    groupTimerRef.current = setTimeout(() => {
+      const items = pendingGroupRef.current;
+      pendingGroupRef.current = [];
+
+      if (items.length === 1) {
+        const t = items[0];
+        const id = Date.now() + Math.random();
+        setToasts((prev) => [...prev, { ...t, toastId: id }]);
+        toastTimers.current[id] = setTimeout(() => removeToast(id), 5000);
+      } else if (items.length > 1) {
+        const id = Date.now() + Math.random();
+        const grouped = {
+          toastId: id,
+          title: `${items.length} New Notifications`,
+          message: "You have a batch of new notifications waiting.",
+          count: items.length,
+          aggregatedItems: items.slice(0, 3).map(i => i.title).concat(items.length > 3 ? [`+ ${items.length - 3} more`] : []),
+          type: "INFO",
+          priority: items.some(i => i.priority === "HIGH") ? "HIGH" : "MEDIUM",
+          isGrouped: true,
+          deepLink: "/notifications"
+        };
+        setToasts((prev) => [...prev, grouped]);
+        toastTimers.current[id] = setTimeout(() => removeToast(id), 5000);
+      }
+    }, 2500); // 2.5 second buffer
   }, []);
 
   const removeToast = (toastId) => {
@@ -173,6 +218,11 @@ export const NotificationProvider = ({ children }) => {
         const existing = prev.find((n) => (n.id === notification.id || n.userNotificationId === notification.userNotificationId));
         
         if (existing) {
+          // If archived or snoozed, remove it from active list
+          if (notification.isArchived || (notification.snoozedUntil && new Date(notification.snoozedUntil) > new Date())) {
+            if (!existing.isRead) setUnreadCount(c => Math.max(0, c - 1));
+            return prev.filter(n => n.id !== notification.id && n.userNotificationId !== notification.userNotificationId);
+          }
           // Normal update
           return prev.map((n) =>
             (n.id === notification.id || n.userNotificationId === notification.userNotificationId) ? {
@@ -183,6 +233,8 @@ export const NotificationProvider = ({ children }) => {
               editedAt: notification.editedAt,
               attachmentUrl: notification.attachmentUrl,
               attachmentName: notification.attachmentName,
+              actionButtonText: notification.actionButtonText,
+              actionButtonUrl: notification.actionButtonUrl,
             } : n
           );
         } else {
@@ -201,8 +253,11 @@ export const NotificationProvider = ({ children }) => {
               id: notification.senderId, 
               name: notification.senderName 
             },
-            attachmentUrl: notification.attachmentUrl,
             attachmentName: notification.attachmentName,
+            actionButtonText: notification.actionButtonText,
+            actionButtonUrl: notification.actionButtonUrl,
+            snoozedUntil: notification.snoozedUntil,
+            isArchived: notification.isArchived,
           };
           // Put it at top
           return [newItem, ...prev];
@@ -357,6 +412,24 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
+  const toggleArchive = async (userNotificationId) => {
+    try {
+      await notificationAPI.archive(userNotificationId);
+      // Wait for WS UPDATE to handle the removal from active list
+    } catch (e) {
+      console.error("Failed to toggle archive", e);
+    }
+  };
+
+  const snoozeNotification = async (userNotificationId, minutes) => {
+    try {
+      await notificationAPI.snooze(userNotificationId, { snoozeMinutes: minutes });
+      // Wait for WS UPDATE to handle the removal from active list
+    } catch (e) {
+      console.error("Failed to snooze notification", e);
+    }
+  };
+
   const sendReply = async (notificationId, message) => {
     try {
       const res = await notificationAPI.reply(notificationId, { message });
@@ -437,6 +510,8 @@ export const NotificationProvider = ({ children }) => {
         setUnreadCount,
         togglePin,
         toggleFavorite,
+        toggleArchive,
+        snoozeNotification,
         replies,
         unreadReplyCount,
         sendReply,

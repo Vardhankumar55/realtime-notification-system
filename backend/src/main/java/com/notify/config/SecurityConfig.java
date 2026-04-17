@@ -76,9 +76,9 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/notifications/download/**").permitAll()
                 .requestMatchers("/ws/**").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers("/api/push/vapid-public-key").permitAll()
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())

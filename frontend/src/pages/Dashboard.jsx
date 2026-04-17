@@ -1,9 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useNotifications } from "../context/NotificationContext";
-import Navbar from "../components/common/Navbar";
-import NotificationCard from "../components/notifications/NotificationCard";
+import { useNotifications } from "../context/LiveContext";
+import Navbar from "../components/common/NavbarV2";
+import NotificationCard from "../components/notifications/NotificationCardV2";
 
 /**
  * Dashboard — the main landing page after login.

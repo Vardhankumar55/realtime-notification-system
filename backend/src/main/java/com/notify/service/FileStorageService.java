@@ -15,6 +15,7 @@ import java.util.UUID;
  * Service for local file storage in the 'uploads' directory.
  */
 @Service
+@SuppressWarnings("null")
 public class FileStorageService {
 
     private final Path fileStorageLocation;
@@ -29,8 +30,12 @@ public class FileStorageService {
     }
 
     public String storeFile(MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null) {
+            throw new RuntimeException("Original file name is missing");
+        }
         // Normalize file name
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        String fileName = StringUtils.cleanPath(originalFilename);
 
         try {
             // Check if the file's name contains invalid characters

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { notificationAPI, adminAPI } from "../services/api";
-import { useNotifications } from "../context/NotificationContext";
+import { useNotifications } from "../context/LiveContext";
 import { useAuth } from "../context/AuthContext";
-import Navbar from "../components/common/Navbar";
-import NotificationCard from "../components/notifications/NotificationCard";
+import Navbar from "../components/common/NavbarV2";
+import NotificationCard from "../components/notifications/NotificationCardV2";
+import AdminTemplatesTab from "../components/notifications/AdminTemplatesTab";
 
 const TYPES = [
   "INFO", 
@@ -36,7 +37,7 @@ const AdminPanel = () => {
   const [form, setForm] = useState({
     title: "", message: "", type: "INFO", targetType: "ALL", targetUserIds: [],
     branch: "All", year: "All", section: "All", canReply: false,
-    isScheduled: false, scheduledAt: "", file: null,
+    summary: "", priority: "MEDIUM", deepLink: "", isScheduled: false, scheduledAt: "", file: null,
     useOverrides: false, userOverrides: []
   });
   const [userFilters, setUserFilters] = useState({ 
@@ -170,7 +171,10 @@ const AdminPanel = () => {
       const payload = {
         title: form.title || (form.useOverrides ? "Individual Notification" : ""),
         message: form.message || (form.useOverrides ? "Check override for content." : ""),
+        summary: form.summary,
         type: form.type,
+        priority: form.priority,
+        deepLink: form.deepLink,
         targetType: form.targetType,
         targetUserIds: form.targetUserIds,
         branch: form.branch,
@@ -200,7 +204,7 @@ const AdminPanel = () => {
       });
 
       setSendResult({ success: true, message: res.data.message || (form.isScheduled ? "Notification scheduled." : "Notification sent.") });
-      setForm({ title: "", message: "", type: "INFO", targetType: "ALL", targetUserIds: [], branch: "All", year: "All", section: "All", canReply: false, isScheduled: false, scheduledAt: "", file: null, useOverrides: false, userOverrides: [] });
+      setForm({ title: "", message: "", type: "INFO", targetType: "ALL", targetUserIds: [], branch: "All", year: "All", section: "All", canReply: false, summary: "", priority: "MEDIUM", deepLink: "", isScheduled: false, scheduledAt: "", file: null, useOverrides: false, userOverrides: [] });
       // Reset file input manually if needed, but since it's a re-render it should clear if we are careful.
       // Easiest way in React is to key the input or use a ref.
       await loadHistory();
@@ -303,7 +307,10 @@ const AdminPanel = () => {
         await adminAPI.updateNotification(editingNotification.id, {
           title: editingNotification.title,
           message: editingNotification.message,
+          summary: editingNotification.summary,
           type: editingNotification.type,
+          priority: editingNotification.priority,
+          deepLink: editingNotification.deepLink,
           canReply: editingNotification.canReply
         });
       } else {
@@ -420,6 +427,7 @@ const AdminPanel = () => {
         <div className="flex gap-2 bg-white rounded-2xl border border-gray-100 p-1.5 shadow-sm w-fit mb-8 overflow-x-auto max-w-full">
           {[
             { id: "send", label: "Create Notification", icon: "🚀" },
+            { id: "templates", label: "Templates", icon: "📋" },
             { id: "users", label: "Manage Users", icon: "👥" },
             { id: "history", label: "Audit Logs", icon: "📜" },
             { id: "replies", label: "Replies From Users", icon: "💬", badge: unreadReplyCount }
@@ -437,6 +445,13 @@ const AdminPanel = () => {
             </button>
           ))}
         </div>
+
+        {/* ── TEMPLATES TAB ── */}
+        {tab === "templates" && (
+          <div className="animate-fade-in">
+            <AdminTemplatesTab onApplyTemplate={handleApplyTemplate} />
+          </div>
+        )}
 
         {/* ── SEND TAB ── */}
         {tab === "send" && (
@@ -460,6 +475,40 @@ const AdminPanel = () => {
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-500 ml-1">Detailed Content</label>
                     <textarea required={!form.useOverrides} rows={4} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className="w-full px-5 py-3.5 rounded-2xl border border-gray-200 focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none text-sm font-medium transition-all resize-none" placeholder="Notification Message" />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-500 ml-1">Summary</label>
+                      <input
+                        type="text"
+                        value={form.summary}
+                        onChange={(e) => setForm({ ...form, summary: e.target.value })}
+                        className="w-full px-5 py-3.5 rounded-2xl border border-gray-200 focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none text-sm font-medium transition-all"
+                        placeholder="Short one-line summary for popups"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-500 ml-1">Priority</label>
+                      <select
+                        value={form.priority}
+                        onChange={(e) => setForm({ ...form, priority: e.target.value })}
+                        className="w-full px-5 py-3.5 rounded-2xl border border-gray-200 text-sm font-medium bg-white outline-none focus:ring-4 focus:ring-indigo-50 transition-all cursor-pointer"
+                      >
+                        {["LOW", "MEDIUM", "HIGH", "URGENT"].map((priority) => (
+                          <option key={priority} value={priority}>{priority}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-500 ml-1">Redirect Link</label>
+                    <input
+                      type="text"
+                      value={form.deepLink}
+                      onChange={(e) => setForm({ ...form, deepLink: e.target.value })}
+                      className="w-full px-5 py-3.5 rounded-2xl border border-gray-200 focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none text-sm font-medium transition-all"
+                      placeholder="/messages?user=12 or /notifications"
+                    />
                   </div>
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
@@ -1055,6 +1104,40 @@ const AdminPanel = () => {
                     value={editingNotification.message} 
                     onChange={(e) => setEditingNotification({...editingNotification, message: e.target.value})}
                     className="w-full px-5 py-3 rounded-2xl border border-gray-200 focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none text-sm font-medium transition-all resize-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-2 md:col-span-2">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Summary</label>
+                    <input
+                      type="text"
+                      value={editingNotification.summary || ""}
+                      onChange={(e) => setEditingNotification({ ...editingNotification, summary: e.target.value })}
+                      className="w-full px-5 py-3 rounded-2xl border border-gray-200 focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none text-sm font-medium transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Priority</label>
+                    <select
+                      value={editingNotification.priority || "MEDIUM"}
+                      onChange={(e) => setEditingNotification({ ...editingNotification, priority: e.target.value })}
+                      className="w-full px-5 py-3 rounded-2xl border border-gray-200 text-sm font-medium bg-white outline-none focus:ring-4 focus:ring-indigo-50 transition-all cursor-pointer"
+                    >
+                      {["LOW", "MEDIUM", "HIGH", "URGENT"].map((priority) => (
+                        <option key={priority} value={priority}>{priority}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Redirect Link</label>
+                  <input
+                    type="text"
+                    value={editingNotification.deepLink || ""}
+                    onChange={(e) => setEditingNotification({ ...editingNotification, deepLink: e.target.value })}
+                    className="w-full px-5 py-3 rounded-2xl border border-gray-200 focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none text-sm font-medium transition-all"
                   />
                 </div>
 

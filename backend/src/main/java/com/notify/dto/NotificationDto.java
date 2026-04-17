@@ -30,8 +30,13 @@ public class NotificationDto {
         @NotBlank(message = "Message is required")
         private String message;
 
+        @Size(max = 280, message = "Summary must not exceed 280 characters")
+        private String summary;
+
         @NotNull(message = "Notification type is required")
         private Notification.NotificationType type;
+
+        private Notification.NotificationPriority priority;
 
         @NotBlank(message = "Target type is required")
         private String targetType;
@@ -44,6 +49,9 @@ public class NotificationDto {
         private Boolean isScheduled;
         private LocalDateTime scheduledAt;
         private List<UserOverride> userOverrides;
+        private String deepLink;
+        private String actionButtonText;
+        private String actionButtonUrl;
     }
 
     @Data
@@ -65,8 +73,14 @@ public class NotificationDto {
         @NotBlank(message = "Message is required")
         @Size(max = 1000, message = "Message must not exceed 1000 characters")
         private String message;
+        @Size(max = 280, message = "Summary must not exceed 280 characters")
+        private String summary;
         private Notification.NotificationType type;
+        private Notification.NotificationPriority priority;
         private Boolean canReply;
+        private String deepLink;
+        private String actionButtonText;
+        private String actionButtonUrl;
     }
 
     @Data
@@ -85,21 +99,8 @@ public class NotificationDto {
     public static class UserOverride {
         @NotNull(message = "User ID is required")
         private Long userId;
-        @NotBlank(message = "Title is required")
         private String title;
-        @NotBlank(message = "Message is required")
         private String message;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class FilterRequest {
-        private String type;
-        private Boolean isRead;
-        private String startDate;
-        private String endDate;
-        private Boolean isFavorite;
     }
 
     // ─── Response DTOs ─────────────────────────────────────────
@@ -112,7 +113,9 @@ public class NotificationDto {
         private Long id;
         private String title;
         private String message;
+        private String summary;
         private String type;
+        private String priority;
         private SenderInfo sender;
         private LocalDateTime createdAt;
         private LocalDateTime editedAt;
@@ -129,6 +132,15 @@ public class NotificationDto {
         private LocalDateTime scheduledAt;
         private String attachmentUrl;
         private String attachmentName;
+        private String attachmentContentType;
+        private Long attachmentSize;
+        private String deepLink;
+        private String actionButtonText;
+        private String actionButtonUrl;
+        private Boolean isActionAcknowledged;
+        private Boolean isArchived;
+        private LocalDateTime snoozedUntil;
+        private LocalDateTime expiresAt;
     }
 
     @Data
@@ -183,7 +195,9 @@ public class NotificationDto {
         private Long id;
         private String title;
         private String message;
+        private String summary;
         private String type;
+        private String priority;
         private Long senderId;
         private String senderName;
         private LocalDateTime createdAt;
@@ -192,11 +206,20 @@ public class NotificationDto {
         private Boolean isPinned;
         private Boolean isFavorite;
         private Boolean canReply;
-        private Long adminId; // ID of the admin who triggered the action
+        private Long adminId;
         private String attachmentUrl;
         private String attachmentName;
+        private String deepLink;
+        private String actionButtonText;
+        private String actionButtonUrl;
+        private Boolean isActionAcknowledged;
+        private Boolean isArchived;
+        private LocalDateTime snoozedUntil;
+        private LocalDateTime expiresAt;
         private String action; // "PUSH", "UPDATE", "PIN", "FAVORITE", "EDITING"
     }
+
+    // ─── Generic API Response ──────────────────────────────────
 
     @Data
     @Builder
@@ -221,5 +244,27 @@ public class NotificationDto {
                 .message(message)
                 .build();
         }
+    }
+
+    // ─── Archive / Snooze Requests ─────────────────────────────
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class FilterRequest {
+        private String type;
+        private String startDate;
+        private String endDate;
+        private Boolean isRead;
+        private Boolean isFavorite;
+        private Boolean isArchived;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SnoozeRequest {
+        @NotNull(message = "Snooze duration is required")
+        private Integer snoozeMinutes;
     }
 }

@@ -31,9 +31,17 @@ public class Notification {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
 
+    @Column(length = 280)
+    private String summary;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private NotificationType type;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    @Column(nullable = false, length = 20, columnDefinition = "varchar(20) default 'MEDIUM'")
+    private NotificationPriority priority = NotificationPriority.MEDIUM;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id", nullable = false)
@@ -49,6 +57,9 @@ public class Notification {
     @Builder.Default
     @Column(name = "is_scheduled")
     private Boolean isScheduled = false;
+
+    @Column(name = "expires_at")
+    private LocalDateTime expiresAt;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -67,6 +78,15 @@ public class Notification {
     @Column(name = "attachment_name")
     private String attachmentName;
 
+    @Column(name = "attachment_content_type", length = 120)
+    private String attachmentContentType;
+
+    @Column(name = "attachment_size")
+    private Long attachmentSize;
+
+    @Column(name = "deep_link")
+    private String deepLink;
+
     @Column(name = "target_type", length = 30)
     private String targetType;
 
@@ -81,6 +101,12 @@ public class Notification {
 
     @Column(name = "target_user_ids", columnDefinition = "TEXT")
     private String targetUserIds;
+
+    @Column(name = "action_button_text", length = 50)
+    private String actionButtonText;
+
+    @Column(name = "action_button_url")
+    private String actionButtonUrl;
 
     @Builder.Default
     @OneToMany(mappedBy = "notification", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -102,5 +128,12 @@ public class Notification {
         HOLIDAY_ANNOUNCEMENTS,
         CLASSROOM_CHANGES,
         ATTENDANCE_WARNINGS
+    }
+
+    public enum NotificationPriority {
+        LOW,
+        MEDIUM,
+        HIGH,
+        URGENT
     }
 }

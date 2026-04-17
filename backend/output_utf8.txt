@@ -1,0 +1,242 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------< com.notify:notification-system >-------------------
+[INFO] Building Real-Time Notification System 1.0.0
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.3.2:clean (default-clean) @ notification-system ---
+[INFO] Deleting E:\realtime-notification-system\backend\target
+[INFO] 
+[INFO] --- maven-resources-plugin:3.3.1:resources (default-resources) @ notification-system ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.11.0:compile (default-compile) @ notification-system ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 37 source files with javac [debug release 17] to target\classes
+[INFO] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[75,43] ';' expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[78,36] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[78,49] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[79,33] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[80,32] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[84,36] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[84,49] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[86,9] illegal start of type
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[86,17] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[86,42] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[86,44] ';' expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[100,9] illegal start of type
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[100,22] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[107,9] illegal start of type
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[107,25] ';' expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[107,35] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[159,9] illegal start of type
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[159,30] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[159,32] ';' expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[169,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[172,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[175,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[177,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[194,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[201,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[203,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[206,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[227,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[231,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[232,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[237,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[239,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[244,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[249,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[254,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[255,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[257,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[261,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[264,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[267,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[271,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[276,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[281,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[285,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[286,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[287,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[289,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[290,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[295,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[297,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[299,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[300,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[302,13] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[303,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[304,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[307,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[311,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[316,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[318,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[319,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[324,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[329,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[336,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[337,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[340,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[342,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[343,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[348,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[351,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[354,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[358,13] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[368,17] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[369,13] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[380,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[385,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[386,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[388,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[399,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[400,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[405,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[407,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[408,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[411,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[415,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[420,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[433,17] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[434,17] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[435,17] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[436,13] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[438,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[443,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[445,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[448,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[449,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[450,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[451,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[453,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[456,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[459,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[462,9] class, interface, enum, or record expected
+[INFO] 100 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.776 s
+[INFO] Finished at: 2026-04-06T23:04:05+05:30
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project notification-system: Compilation failure: Compilation failure: 
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[75,43] ';' expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[78,36] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[78,49] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[79,33] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[80,32] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[84,36] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[84,49] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[86,9] illegal start of type
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[86,17] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[86,42] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[86,44] ';' expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[100,9] illegal start of type
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[100,22] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[107,9] illegal start of type
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[107,25] ';' expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[107,35] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[159,9] illegal start of type
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[159,30] <identifier> expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[159,32] ';' expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[169,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[172,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[175,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[177,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[194,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[201,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[203,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[206,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[227,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[231,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[232,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[237,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[239,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[244,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[249,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[254,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[255,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[257,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[261,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[264,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[267,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[271,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[276,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[281,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[285,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[286,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[287,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[289,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[290,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[295,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[297,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[299,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[300,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[302,13] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[303,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[304,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[307,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[311,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[316,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[318,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[319,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[324,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[329,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[336,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[337,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[340,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[342,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[343,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[348,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[351,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[354,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[358,13] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[368,17] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[369,13] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[380,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[385,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[386,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[388,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[399,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[400,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[405,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[407,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[408,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[411,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[415,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[420,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[433,17] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[434,17] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[435,17] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[436,13] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[438,5] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[443,12] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[445,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[448,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[449,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[450,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[451,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[453,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[456,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[459,9] class, interface, enum, or record expected
+[ERROR] /E:/realtime-notification-system/backend/src/main/java/com/notify/service/NotificationService.java:[462,9] class, interface, enum, or record expected
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

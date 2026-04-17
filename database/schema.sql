@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS notifications (
     type        VARCHAR(30)   NOT NULL DEFAULT 'INFO'
                               CHECK (type IN ('INFO','WARNING','SUCCESS','ERROR','ANNOUNCEMENT','EXAM_DATES','ASSIGNMENT_DEADLINES','PLACEMENT_DRIVE_ALERTS','HOLIDAY_ANNOUNCEMENTS','CLASSROOM_CHANGES','ATTENDANCE_WARNINGS')),
     sender_id   BIGINT        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    created_at  TIMESTAMP     NOT NULL DEFAULT NOW()
+    created_at  TIMESTAMP     NOT NULL DEFAULT NOW(),
+    expires_at  TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_notifications_sender     ON notifications(sender_id);
@@ -44,12 +45,51 @@ CREATE TABLE IF NOT EXISTS user_notifications (
     notification_id  BIGINT    NOT NULL REFERENCES notifications(id) ON DELETE CASCADE,
     is_read          BOOLEAN   NOT NULL DEFAULT FALSE,
     read_at          TIMESTAMP,
+    is_archived      BOOLEAN   NOT NULL DEFAULT FALSE,
+    snoozed_until    TIMESTAMP,
     UNIQUE (user_id, notification_id)   -- prevent duplicate rows
 );
 
 CREATE INDEX IF NOT EXISTS idx_un_user_id          ON user_notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_un_notification_id  ON user_notifications(notification_id);
 CREATE INDEX IF NOT EXISTS idx_un_is_read          ON user_notifications(is_read);
+
+-- ── 4. DIRECT_MESSAGES TABLE ───────────────────────────────
+CREATE TABLE IF NOT EXISTS direct_messages (
+    id           BIGSERIAL PRIMARY KEY,
+    sender_id    BIGINT    NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    recipient_id BIGINT    NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    content      TEXT      NOT NULL,
+    priority     VARCHAR(20) NOT NULL DEFAULT 'MEDIUM',
+    created_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+    read_at      TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_dm_users ON direct_messages(sender_id, recipient_id);
+
+-- ── 5. USER_BLOCKS TABLE ─────────────────────────────────────
+CREATE TABLE IF NOT EXISTS user_blocks (
+    id           BIGSERIAL PRIMARY KEY,
+    blocker_id   BIGINT    NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    blocked_id   BIGINT    NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+    UNIQUE (blocker_id, blocked_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_ub_blocker ON user_blocks(blocker_id);
+
+-- ── 6. NOTIFICATION_TEMPLATES TABLE ────────────────────────
+CREATE TABLE IF NOT EXISTS notification_templates (
+    id                 BIGSERIAL PRIMARY KEY,
+    name               VARCHAR(100) NOT NULL,
+    title              VARCHAR(200) NOT NULL,
+    message            TEXT NOT NULL,
+    type               VARCHAR(30) NOT NULL DEFAULT 'INFO',
+    priority           VARCHAR(20) NOT NULL DEFAULT 'MEDIUM',
+    action_button_text VARCHAR(50),
+    action_button_url  VARCHAR(255),
+    created_at         TIMESTAMP NOT NULL DEFAULT NOW()
+);
 
 -- ============================================================
 -- SAMPLE TEST DATA
